@@ -1,13 +1,13 @@
-document.getElementById('toggle-readability').addEventListener('click', () => {
-	// Query the active tab in the current window
+document.getElementById('apply-readability').addEventListener('click', () => {
+	const fontSize = document.getElementById('font-size').value;  // Get the selected font size
 	chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-	  // Inject the content script dynamically
+	  // Inject the content script if it's not already injected
 	  chrome.scripting.executeScript({
 		target: { tabId: tabs[0].id },
 		files: ['content_scripts/makeReadable.js']
 	  }, () => {
-		// Once injected, send the message to trigger readability
-		chrome.tabs.sendMessage(tabs[0].id, { action: 'enableReadability' }, (response) => {
+		// Send message to the content script with the selected font size
+		chrome.tabs.sendMessage(tabs[0].id, { action: 'enableReadability', fontSize: fontSize }, (response) => {
 		  if (chrome.runtime.lastError) {
 			console.error("Error sending message:", chrome.runtime.lastError);
 		  } else {
