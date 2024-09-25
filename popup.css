@@ -8,11 +8,14 @@ body {
 	text-align: center;
   }
   
-  button {
+  select, button {
 	width: 100%;
 	padding: 10px;
 	margin-top: 10px;
-	font-size: 16px;
+	font-size: 14px;
+  }
+  
+  button {
 	background-color: #4CAF50;
 	color: white;
 	border: none;
