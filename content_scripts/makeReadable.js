@@ -1,32 +1,44 @@
-console.log('makeReadable.js loaded');  // Debugging
+// Debugging
+console.log('makeReadable.js loaded');
 
-let originalContent = null;  // To store the original page content
+// Store the original content to revert back if needed
+let originalContent = null;
 
+// Listen for messages from the popup script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'enableReadability') {
     if (!originalContent) {
-      originalContent = document.body.innerHTML;  // Store the original page content
+      originalContent = document.body.innerHTML;  // Store original page content only once
     }
-    makePageReadable(request.fontSize, request.colorMode, request.textAlign, request.lineHeight, request.fontFamily);
+    // Enable readability with user settings
+    makePageReadable(
+      request.fontSize,
+      request.colorMode,
+      request.textAlign,
+      request.lineHeight,
+      request.fontFamily
+    );
   } else if (request.action === 'disableReadability') {
-    resetPageToOriginal();  // Call function to reset page
+    resetPageToOriginal();  // Restore the page to its original state
   }
 });
 
-function makePageReadable(fontSize = '18px', colorMode = 'light', textAlign = 'left', lineHeight = '1.4', fontFamily = 'Arial') {  // Add font family as a parameter
-  console.log('Running readability with font size:', fontSize, 'color mode:', colorMode, 'text alignment:', textAlign, 'line height:', lineHeight, 'font family:', fontFamily);  // Debugging
+// Function to apply Readability.js and style modifications
+function makePageReadable(fontSize = '18px', colorMode = 'light', textAlign = 'left', lineHeight = '1.4', fontFamily = 'Arial') {
+  console.log('Running readability with settings:', { fontSize, colorMode, textAlign, lineHeight, fontFamily });
 
+  // Use Readability to extract the main article content
   let article = new Readability(document.cloneNode(true)).parse();
 
   if (article) {
     document.body.innerHTML = article.content;
     document.body.style.padding = '20px';
     document.body.style.lineHeight = lineHeight;
-    document.body.style.fontFamily = fontFamily;  // Apply font family
+    document.body.style.fontFamily = fontFamily;
     document.body.style.fontSize = fontSize;
     document.body.style.textAlign = textAlign;
 
-    // Apply the selected color mode
+    // Apply the chosen color mode (light, dark, sepia)
     switch (colorMode) {
       case 'dark':
         document.body.style.backgroundColor = '#121212';
@@ -36,7 +48,7 @@ function makePageReadable(fontSize = '18px', colorMode = 'light', textAlign = 'l
         document.body.style.backgroundColor = '#f4ecd8';
         document.body.style.color = '#5b4636';
         break;
-      default:  // Light mode
+      default:
         document.body.style.backgroundColor = '#ffffff';
         document.body.style.color = '#000000';
         break;
@@ -46,9 +58,11 @@ function makePageReadable(fontSize = '18px', colorMode = 'light', textAlign = 'l
   }
 }
 
+// Function to restore the original page content
 function resetPageToOriginal() {
   if (originalContent) {
-    document.body.innerHTML = originalContent;  // Restore original content
-    originalContent = null;  // Clear the saved original content
+    document.body.innerHTML = originalContent;  // Revert to the original content
+    originalContent = null;  // Clear the stored original content
+    console.log('Page has been reset to its original state.');
   }
 }
