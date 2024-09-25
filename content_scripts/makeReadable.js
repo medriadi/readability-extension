@@ -2,20 +2,22 @@ console.log('makeReadable.js loaded');  // Debugging
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'enableReadability') {
-    makePageReadable(request.fontSize, request.colorMode);  // Passing colorMode
+    makePageReadable(request.fontSize, request.colorMode, request.textAlign, request.lineHeight);  // Pass alignment and line height
   }
 });
 
-function makePageReadable(fontSize = '18px', colorMode = 'light') {  // Default values
-  console.log('Running readability function with font size:', fontSize, 'and color mode:', colorMode);  // Debugging
+function makePageReadable(fontSize = '18px', colorMode = 'light', textAlign = 'left', lineHeight = '1.4') {  // Default values
+  console.log('Running readability with font size:', fontSize, 'color mode:', colorMode, 'text alignment:', textAlign, 'line height:', lineHeight);  // Debugging
+
   let article = new Readability(document.cloneNode(true)).parse();
 
   if (article) {
     document.body.innerHTML = article.content;
     document.body.style.padding = '20px';
-    document.body.style.lineHeight = '1.6';
+    document.body.style.lineHeight = lineHeight;  // Apply line height
     document.body.style.fontFamily = 'Arial, sans-serif';
     document.body.style.fontSize = fontSize;
+    document.body.style.textAlign = textAlign;  // Apply text alignment
 
     // Apply the selected color mode
     switch (colorMode) {
