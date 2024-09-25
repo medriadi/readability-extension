@@ -1,23 +1,30 @@
 console.log('makeReadable.js loaded');  // Debugging
 
+let originalContent = null;  // To store the original page content
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'enableReadability') {
-    makePageReadable(request.fontSize, request.colorMode, request.textAlign, request.lineHeight);  // Pass alignment and line height
+    if (!originalContent) {
+      originalContent = document.body.innerHTML;  // Store the original page content
+    }
+    makePageReadable(request.fontSize, request.colorMode, request.textAlign, request.lineHeight, request.fontFamily);
+  } else if (request.action === 'disableReadability') {
+    resetPageToOriginal();  // Call function to reset page
   }
 });
 
-function makePageReadable(fontSize = '18px', colorMode = 'light', textAlign = 'left', lineHeight = '1.4') {  // Default values
-  console.log('Running readability with font size:', fontSize, 'color mode:', colorMode, 'text alignment:', textAlign, 'line height:', lineHeight);  // Debugging
+function makePageReadable(fontSize = '18px', colorMode = 'light', textAlign = 'left', lineHeight = '1.4', fontFamily = 'Arial') {  // Add font family as a parameter
+  console.log('Running readability with font size:', fontSize, 'color mode:', colorMode, 'text alignment:', textAlign, 'line height:', lineHeight, 'font family:', fontFamily);  // Debugging
 
   let article = new Readability(document.cloneNode(true)).parse();
 
   if (article) {
     document.body.innerHTML = article.content;
     document.body.style.padding = '20px';
-    document.body.style.lineHeight = lineHeight;  // Apply line height
-    document.body.style.fontFamily = 'Arial, sans-serif';
+    document.body.style.lineHeight = lineHeight;
+    document.body.style.fontFamily = fontFamily;  // Apply font family
     document.body.style.fontSize = fontSize;
-    document.body.style.textAlign = textAlign;  // Apply text alignment
+    document.body.style.textAlign = textAlign;
 
     // Apply the selected color mode
     switch (colorMode) {
@@ -36,5 +43,12 @@ function makePageReadable(fontSize = '18px', colorMode = 'light', textAlign = 'l
     }
   } else {
     console.log('Readability failed to parse the article.');
+  }
+}
+
+function resetPageToOriginal() {
+  if (originalContent) {
+    document.body.innerHTML = originalContent;  // Restore original content
+    originalContent = null;  // Clear the saved original content
   }
 }
